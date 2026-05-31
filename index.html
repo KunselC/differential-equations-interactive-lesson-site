@@ -1,0 +1,1260 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Differential Equations Interactive Lesson</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Serif+4:wght@300;400;600&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    ></script>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --panel: #151821;
+        --text: #f0e8d5;
+        --muted: #b8b1a3;
+        --accent: #e8a430;
+        --teal: #3ea8a0;
+        --line: rgba(240, 232, 213, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(
+            circle at 20% 20%,
+            rgba(62, 168, 160, 0.08),
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 10%,
+            rgba(232, 164, 48, 0.08),
+            transparent 45%
+          ),
+          var(--bg);
+        color: var(--text);
+        font-family: "Source Serif 4", serif;
+        line-height: 1.6;
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: "Playfair Display", serif;
+        letter-spacing: 0.5px;
+        margin: 0 0 12px;
+      }
+
+      h2 {
+        font-size: 2.1rem;
+      }
+
+      p {
+        margin: 0 0 16px;
+      }
+
+      .mono {
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: 64px 1fr;
+      }
+
+      .progress {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        height: 100vh;
+        padding: 24px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .progress .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 1px solid var(--muted);
+        transition: all 0.3s ease;
+        opacity: 0.6;
+      }
+
+      .progress .dot.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        box-shadow: 0 0 12px rgba(232, 164, 48, 0.6);
+        opacity: 1;
+      }
+
+      section {
+        padding: 80px 7vw;
+        position: relative;
+        border-bottom: 1px solid var(--line);
+        overflow: hidden;
+      }
+
+      section::before {
+        content: attr(data-section);
+        position: absolute;
+        font-size: 9rem;
+        font-family: "Playfair Display", serif;
+        color: rgba(240, 232, 213, 0.05);
+        top: 10px;
+        right: 8vw;
+        pointer-events: none;
+      }
+
+      .hero {
+        min-height: 85vh;
+        display: grid;
+        align-items: center;
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr) minmax(200px, 380px);
+        gap: 32px;
+      }
+
+      .hero canvas {
+        width: 100%;
+        height: 260px;
+        border: 1px solid var(--line);
+        background: rgba(15, 17, 23, 0.4);
+      }
+
+      .section-subtitle {
+        color: var(--muted);
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition:
+          opacity 0.7s ease,
+          transform 0.7s ease;
+      }
+
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .slope-layout {
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr) minmax(220px, 320px);
+        gap: 32px;
+        align-items: start;
+      }
+
+      .canvas-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        padding: 16px;
+      }
+
+      .canvas-wrap {
+        position: relative;
+      }
+
+      #slopeCanvas {
+        width: 100%;
+        height: 360px;
+        border: 1px solid var(--line);
+        background: rgba(10, 12, 18, 0.7);
+        display: block;
+        cursor: grab;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      select,
+      button,
+      input[type="text"],
+      .choice {
+        background: #10131b;
+        color: var(--text);
+        border: 1px solid rgba(240, 232, 213, 0.2);
+        padding: 8px 12px;
+        font-family: "Source Serif 4", serif;
+        border-radius: 4px;
+      }
+
+      button {
+        cursor: pointer;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+      }
+
+      button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .guide {
+        padding: 18px;
+        background: rgba(21, 24, 33, 0.9);
+        border-left: 3px solid var(--teal);
+        font-style: italic;
+      }
+
+      .card-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+      }
+
+      .flip-card {
+        perspective: 1200px;
+      }
+
+      .flip-inner {
+        position: relative;
+        min-height: 180px;
+        transition: transform 0.7s ease;
+        transform-style: preserve-3d;
+      }
+
+      .flip-card:hover .flip-inner,
+      .flip-card.flipped .flip-inner {
+        transform: rotateY(180deg);
+      }
+
+      .flip-face {
+        position: absolute;
+        inset: 0;
+        padding: 18px;
+        border-radius: 8px;
+        backface-visibility: hidden;
+        border: 1px solid rgba(232, 164, 48, 0.3);
+        background: rgba(21, 24, 33, 0.92);
+        box-shadow: 0 0 0 transparent;
+        transition:
+          box-shadow 0.3s ease,
+          border 0.3s ease;
+      }
+
+      .flip-card:hover .flip-face {
+        border: 1px solid rgba(232, 164, 48, 0.8);
+        box-shadow: 0 0 18px rgba(232, 164, 48, 0.2);
+      }
+
+      .flip-back {
+        transform: rotateY(180deg);
+      }
+
+      .exercise-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+      }
+
+      .exercise-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        padding: 18px;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .exercise-card.correct::after {
+        content: "\2713";
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        color: var(--accent);
+        font-size: 1.4rem;
+        animation: pop 0.4s ease;
+      }
+
+      @keyframes pop {
+        0% {
+          transform: scale(0.4);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .shake {
+        animation: shake 0.35s ease;
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+
+      .hint-box {
+        margin-top: 12px;
+        background: rgba(16, 19, 27, 0.8);
+        border-left: 3px solid var(--accent);
+        padding: 10px 12px;
+        min-height: 48px;
+        font-family: "JetBrains Mono", monospace;
+        color: var(--muted);
+        white-space: pre-wrap;
+      }
+
+      .solution {
+        margin-top: 12px;
+        border-top: 1px dashed var(--line);
+        padding-top: 10px;
+        display: none;
+      }
+
+      .solution.visible {
+        display: block;
+      }
+
+      .solution-line {
+        opacity: 0;
+        transform: translateX(-20px);
+        animation: slide-in 0.6s ease forwards;
+      }
+
+      @keyframes slide-in {
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      .solution-line span {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-left: 6px;
+      }
+
+      .match-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .match-canvas {
+        width: 100%;
+        height: 180px;
+        border: 1px solid var(--line);
+        background: rgba(10, 12, 18, 0.7);
+        display: block;
+      }
+
+      .drag-label {
+        padding: 10px 12px;
+        border: 1px solid rgba(62, 168, 160, 0.5);
+        background: rgba(21, 24, 33, 0.85);
+        cursor: grab;
+        border-radius: 6px;
+        margin-bottom: 10px;
+      }
+
+      .drop-zone {
+        min-height: 44px;
+        border: 1px dashed rgba(240, 232, 213, 0.3);
+        padding: 8px;
+        border-radius: 6px;
+        margin-top: 8px;
+      }
+
+      .summary-box {
+        background: rgba(21, 24, 33, 0.92);
+        padding: 16px;
+        border-left: 4px solid var(--accent);
+        border-radius: 6px;
+      }
+
+      .slider-wrap {
+        margin-top: 16px;
+        display: grid;
+        gap: 8px;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--accent);
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      @media (max-width: 900px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+
+        .progress {
+          position: fixed;
+          top: auto;
+          bottom: 16px;
+          left: 50%;
+          transform: translateX(-50%);
+          flex-direction: row;
+          background: rgba(15, 17, 23, 0.8);
+          padding: 8px 12px;
+          border-radius: 999px;
+          z-index: 10;
+          height: auto;
+          width: auto;
+        }
+
+        .hero-grid,
+        .slope-layout,
+        .match-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <aside class="progress" aria-label="Progress">
+        <div class="dot" data-target="hero"></div>
+        <div class="dot" data-target="slope"></div>
+        <div class="dot" data-target="cards"></div>
+        <div class="dot" data-target="exercises"></div>
+        <div class="dot" data-target="match"></div>
+        <div class="dot" data-target="closure"></div>
+      </aside>
+
+      <div>
+        <section id="hero" class="hero" data-section="01">
+          <div class="hero-grid reveal">
+            <div>
+              <p class="section-subtitle">An AP Calculus BC Studio</p>
+              <h1 style="font-size: 3.4rem">Differential Equations</h1>
+              <p>
+                When a rate of change talks back to the original function, we
+                are inside a differential equation. These relationships let us
+                model growth, motion, mixing, and any system where change
+                depends on the current state.
+              </p>
+              <p>
+                In this lesson, you will read slope fields like topography,
+                sketch solutions from an initial condition, and reason about why
+                certain forms are separable or linear.
+              </p>
+            </div>
+            <canvas id="heroCanvas" aria-hidden="true"></canvas>
+          </div>
+        </section>
+
+        <section id="slope" data-section="02">
+          <div class="reveal">
+            <h2>Interactive Slope Field Explorer</h2>
+            <p class="muted">
+              Drag the initial condition, watch the local slopes align, and
+              trace the solution curve using Euler's method.
+            </p>
+            <div class="slope-layout">
+              <div class="canvas-card">
+                <div class="controls">
+                  <label for="equationSelect" class="mono">dy/dx =</label>
+                  <select id="equationSelect">
+                    <option value="y">y</option>
+                    <option value="negx_over_y">-x/y</option>
+                    <option value="x_plus_y">x + y</option>
+                    <option value="sinx">sin(x)</option>
+                    <option value="y_minus_x">y - x</option>
+                  </select>
+                </div>
+                <div class="canvas-wrap">
+                  <canvas id="slopeCanvas" width="700" height="420"></canvas>
+                </div>
+                <p class="muted">
+                  Initial condition: <span class="mono" id="icLabel"></span>
+                </p>
+              </div>
+              <div class="guide">
+                <p>
+                  Where are the slopes nearly horizontal? What does that suggest
+                  about equilibrium solutions?
+                </p>
+                <p>
+                  What happens to the solution when you drag the initial
+                  condition across a line of zero slope?
+                </p>
+                <p>
+                  How does Euler's method encode the idea of stepping in the
+                  direction of the slope field?
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="cards" data-section="03">
+          <div class="reveal">
+            <h2>Core Concept Cards</h2>
+            <div class="card-row">
+              <div class="flip-card" tabindex="0">
+                <div class="flip-inner">
+                  <div class="flip-face">
+                    <h3>Separable</h3>
+                    <p class="mono">\(\frac{dy}{dx} = g(x)h(y)\)</p>
+                  </div>
+                  <div class="flip-face flip-back">
+                    <p>
+                      A differential equation you can split into a pure \(x\)
+                      side and a pure \(y\) side.
+                    </p>
+                    <p class="mono">
+                      \(\int \frac{1}{h(y)} dy = \int g(x) dx\)
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="flip-card" tabindex="0">
+                <div class="flip-inner">
+                  <div class="flip-face">
+                    <h3>Equilibrium</h3>
+                    <p class="mono">\(\frac{dy}{dx} = 0\)</p>
+                  </div>
+                  <div class="flip-face flip-back">
+                    <p>A constant solution where the slope field is flat.</p>
+                    <p class="mono">Example: \(y = 0\) solves \(y' = y\).</p>
+                  </div>
+                </div>
+              </div>
+              <div class="flip-card" tabindex="0">
+                <div class="flip-inner">
+                  <div class="flip-face">
+                    <h3>Direction Field</h3>
+                    <p class="mono">\(f(x,y)\)</p>
+                  </div>
+                  <div class="flip-face flip-back">
+                    <p>A map of local slopes that hints at solution shapes.</p>
+                    <p class="mono">
+                      Each small segment points in the direction of change.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="exercises" data-section="04">
+          <div class="reveal">
+            <h2>Exercises</h2>
+            <div class="exercise-grid">
+              <div class="exercise-card" data-answer="general-solution">
+                <p>Find the general solution.</p>
+                <p class="mono">\(x^2 + 4 - y^3\frac{dy}{dx} = 0\)</p>
+                <input type="text" placeholder="Enter an implicit solution" />
+                <div class="controls">
+                  <button class="hint-btn" data-hint="0">Hint 1</button>
+                  <button class="hint-btn" data-hint="1">Hint 2</button>
+                  <button class="hint-btn" data-hint="2">Hint 3</button>
+                </div>
+                <div class="hint-box"></div>
+                <button class="submit-btn">Submit</button>
+                <button class="solution-btn" disabled>Show Solution</button>
+                <div class="solution">
+                  <div class="solution-line" style="animation-delay: 0.1s">
+                    \(x^2 + 4 = y^3\frac{dy}{dx}\)
+                    <span>(rearrange terms)</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 0.3s">
+                    \((x^2+4)\,dx = y^3\,dy\)
+                    <span>(separate variables)</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 0.5s">
+                    \(\frac{1}{3}x^3 + 4x = \frac{1}{4}y^4 + C\)
+                    <span>(integrate both sides)</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 0.7s">
+                    \(4x^3 + 48x - 3y^4 = C\)
+                    <span>(combine constants)</span>
+                  </div>
+                </div>
+                <p class="muted" style="font-size: 0.85rem">
+                  Problem sourced from Emory Oxford Math Center
+                </p>
+              </div>
+              <div class="exercise-card" data-answer="ivp">
+                <p>Solve the differential equation with the given condition.</p>
+                <p class="mono">
+                  \(\frac{dy}{dx} = \frac{5x^2y^2 + y^2}{x^2y^5 + 4x^2},\quad
+                  y(1)=2\)
+                </p>
+                <input type="text" placeholder="Enter the implicit solution" />
+                <div class="controls">
+                  <button class="hint-btn" data-hint="0">Hint 1</button>
+                  <button class="hint-btn" data-hint="1">Hint 2</button>
+                  <button class="hint-btn" data-hint="2">Hint 3</button>
+                </div>
+                <div class="hint-box"></div>
+                <button class="submit-btn">Submit</button>
+                <button class="solution-btn" disabled>Show Solution</button>
+                <div class="solution">
+                  <div class="solution-line" style="animation-delay: 0.1s">
+                    \(\frac{y^2(5x^2+1)}{x^2(y^5+4)}\)
+                    <span>(factor numerator and denominator)</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 0.3s">
+                    \(\frac{y^5+4}{y^2} dy = \frac{5x^2+1}{x^2} dx\)
+                    <span>(separate variables)</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 0.5s">
+                    \(\int (y^3 + 4y^{-2})\,dy = \int (5 + x^{-2})\,dx\)
+                    <span>(rewrite with powers)</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 0.7s">
+                    \(\frac{1}{4}y^4 - \frac{4}{y} = 5x - \frac{1}{x} + C\)
+                    <span>(integrate)</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 0.9s">
+                    \(C = -2\)
+                    <span>(apply \(y(1)=2\))</span>
+                  </div>
+                </div>
+                <p class="muted" style="font-size: 0.85rem">
+                  Problem sourced from Emory Oxford Math Center
+                </p>
+              </div>
+              <div class="exercise-card" data-answer="cooling">
+                <p>
+                  A cup of coffee starts at \(100^\circ\text{C}\) in a
+                  \(20^\circ\text{C}\) room. After 4 minutes, it has cooled to
+                  \(90^\circ\text{C}\). Using Newton's Law of Cooling, find
+                  \(T(t)\), the temperature at time \(t\).
+                </p>
+                <input type="text" placeholder="Enter T(t)" />
+                <div class="controls">
+                  <button class="hint-btn" data-hint="0">Hint 1</button>
+                  <button class="hint-btn" data-hint="1">Hint 2</button>
+                  <button class="hint-btn" data-hint="2">Hint 3</button>
+                </div>
+                <div class="hint-box"></div>
+                <button class="submit-btn">Submit</button>
+                <button class="solution-btn" disabled>Show Solution</button>
+                <div class="solution">
+                  <div class="solution-line" style="animation-delay: 0.1s">
+                    \(\frac{dT}{dt} = k(T-20)\)
+                    <span>(Newton's Law of Cooling)</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 0.3s">
+                    \(\frac{dT}{T-20} = k\,dt\)
+                    <span>(separate variables)</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 0.5s">
+                    \(\ln|T-20| = kt + C\)
+                    <span>(integrate)</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 0.7s">
+                    \(T = 20 + Ae^{kt}\)
+                    <span>(exponentiate)</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 0.9s">
+                    \(A = 80\)
+                    <span>(apply \(T(0)=100\))</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 1.1s">
+                    \(k = \frac{1}{4}\ln\left(\frac{7}{8}\right)\)
+                    <span>(apply \(T(4)=90\))</span>
+                  </div>
+                  <div class="solution-line" style="animation-delay: 1.3s">
+                    \(T(t)=20+80e^{\frac{t}{4}\ln(7/8)}\)
+                    <span>(final model)</span>
+                  </div>
+                </div>
+                <p class="muted" style="font-size: 0.85rem">
+                  Problem sourced from Trinity College Newton's Law of Cooling
+                  Worksheet
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="match" data-section="05">
+          <div class="reveal">
+            <h2>Mini Visual Check</h2>
+            <p>
+              Match each slope field thumbnail to its differential equation.
+            </p>
+            <div class="match-grid">
+              <div>
+                <canvas
+                  id="matchCanvasA"
+                  class="match-canvas"
+                  width="360"
+                  height="180"
+                ></canvas>
+                <div class="drop-zone" data-slot="A">Drop equation here</div>
+              </div>
+              <div>
+                <canvas
+                  id="matchCanvasB"
+                  class="match-canvas"
+                  width="360"
+                  height="180"
+                ></canvas>
+                <div class="drop-zone" data-slot="B">Drop equation here</div>
+              </div>
+            </div>
+            <div style="margin-top: 16px">
+              <div class="drag-label" draggable="true" data-eq="x_plus_y">
+                \(\frac{dy}{dx} = x + y\)
+              </div>
+              <div class="drag-label" draggable="true" data-eq="sinx">
+                \(\frac{dy}{dx} = \sin(x)\)
+              </div>
+              <button id="matchSubmit">Submit</button>
+              <p id="matchFeedback" class="muted"></p>
+            </div>
+          </div>
+        </section>
+
+        <section id="closure" data-section="06">
+          <div class="reveal">
+            <h2>Closure</h2>
+            <div class="summary-box">
+              <ul>
+                <li>
+                  Direction fields encode the local story of a differential
+                  equation.
+                </li>
+                <li>
+                  Initial conditions pick out a single solution curve from
+                  infinitely many.
+                </li>
+                <li>
+                  Separable equations turn change into an integral on each side.
+                </li>
+              </ul>
+            </div>
+            <p class="muted" style="font-style: italic">
+              Looking ahead: we will connect slope fields to logistic growth and
+              autonomous systems.
+            </p>
+            <div class="slider-wrap">
+              <label for="confidence"
+                >Confidence check (1-5):
+                <span id="confidenceLabel" class="mono"
+                  >I am not sure yet</span
+                ></label
+              >
+              <input type="range" id="confidence" min="1" max="5" value="3" />
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const equationFns = {
+        y: (x, y) => y,
+        negx_over_y: (x, y) => (Math.abs(y) < 0.2 ? 0 : -x / y),
+        x_plus_y: (x, y) => x + y,
+        sinx: (x) => Math.sin(x),
+        y_minus_x: (x, y) => y - x,
+      };
+
+      const hints = [
+        [
+          "Rearrange - move the term with dy/dx to the right side of the equation.",
+          "What happens if you multiply both sides by dx - do you get (x^2+4) dx = y^3 dy?",
+          "Once separated, which integrals appear, and how can their constants be combined into a single C?",
+        ],
+        [
+          "Can you factor the numerator and denominator by grouping to expose a shared factor?",
+          "After factoring, split it into (y-stuff)x(x-stuff). Cross-multiply to separate.",
+          "After separating, how could you rewrite the integrands with negative exponents to use the power rule?",
+        ],
+        [
+          "Newton's Law of Cooling says the rate is proportional to the difference from room temperature.",
+          "How do you write dT/dt = k(T-20), and what substitution makes it separable?",
+          "Which two conditions (T(0)=100 and T(4)=90) let you solve for A and then k?",
+        ],
+      ];
+
+      function setupHeroCanvas() {
+        const canvas = document.getElementById("heroCanvas");
+        const ctx = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        ctx.strokeStyle = "rgba(240, 232, 213, 0.12)";
+        ctx.lineWidth = 1;
+        const step = 24;
+        for (let x = step; x < rect.width; x += step) {
+          for (let y = step; y < rect.height; y += step) {
+            const slope =
+              (y - rect.height / 2) / 50 + (x - rect.width / 2) / 100;
+            const angle = Math.atan(slope);
+            const len = 8;
+            ctx.beginPath();
+            ctx.moveTo(x - len * Math.cos(angle), y - len * Math.sin(angle));
+            ctx.lineTo(x + len * Math.cos(angle), y + len * Math.sin(angle));
+            ctx.stroke();
+          }
+        }
+      }
+
+      function setupSlopeField() {
+        const canvas = document.getElementById("slopeCanvas");
+        const ctx = canvas.getContext("2d");
+        let dragging = false;
+        let initial = { x: 1, y: 1 };
+        let currentEq = "y";
+
+        function resizeCanvas() {
+          const rect = canvas.getBoundingClientRect();
+          const scale = window.devicePixelRatio || 1;
+          canvas.width = rect.width * scale;
+          canvas.height = rect.height * scale;
+          ctx.setTransform(scale, 0, 0, scale, 0, 0);
+          draw();
+        }
+
+        function toCanvas(point) {
+          const rect = canvas.getBoundingClientRect();
+          const cx = ((point.x + 5) / 10) * rect.width;
+          const cy = ((5 - point.y) / 10) * rect.height;
+          return { x: cx, y: cy };
+        }
+
+        function toWorld(point) {
+          const rect = canvas.getBoundingClientRect();
+          const wx = (point.x / rect.width) * 10 - 5;
+          const wy = 5 - (point.y / rect.height) * 10;
+          return { x: wx, y: wy };
+        }
+
+        function drawAxes(rect) {
+          ctx.strokeStyle = "rgba(240, 232, 213, 0.15)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(rect.width / 2, 0);
+          ctx.lineTo(rect.width / 2, rect.height);
+          ctx.moveTo(0, rect.height / 2);
+          ctx.lineTo(rect.width, rect.height / 2);
+          ctx.stroke();
+        }
+
+        function drawGrid(rect) {
+          ctx.strokeStyle = "rgba(240, 232, 213, 0.05)";
+          ctx.lineWidth = 1;
+          const step = rect.width / 10;
+          for (let i = 1; i < 10; i += 1) {
+            ctx.beginPath();
+            ctx.moveTo(i * step, 0);
+            ctx.lineTo(i * step, rect.height);
+            ctx.stroke();
+          }
+          for (let i = 1; i < 10; i += 1) {
+            ctx.beginPath();
+            ctx.moveTo(0, i * step);
+            ctx.lineTo(rect.width, i * step);
+            ctx.stroke();
+          }
+        }
+
+        function drawSlopeField(rect) {
+          const step = rect.width / 12;
+          ctx.strokeStyle = "rgba(62, 168, 160, 0.35)";
+          ctx.lineWidth = 1.2;
+          for (let x = step; x < rect.width; x += step) {
+            for (let y = step; y < rect.height; y += step) {
+              const world = toWorld({ x, y });
+              const slope = equationFns[currentEq](world.x, world.y);
+              const angle = Math.atan(slope);
+              const len = 8;
+              ctx.beginPath();
+              ctx.moveTo(x - len * Math.cos(angle), y - len * Math.sin(angle));
+              ctx.lineTo(x + len * Math.cos(angle), y + len * Math.sin(angle));
+              ctx.stroke();
+            }
+          }
+        }
+
+        function drawSolution(rect) {
+          ctx.strokeStyle = "rgba(232, 164, 48, 0.9)";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          let point = { ...initial };
+          for (let i = 0; i < 140; i += 1) {
+            const screen = toCanvas(point);
+            if (i === 0) {
+              ctx.moveTo(screen.x, screen.y);
+            } else {
+              ctx.lineTo(screen.x, screen.y);
+            }
+            const slope = equationFns[currentEq](point.x, point.y);
+            point.x += 0.08;
+            point.y += slope * 0.08;
+            if (point.x > 5 || point.x < -5 || point.y > 5 || point.y < -5) {
+              break;
+            }
+          }
+          ctx.stroke();
+
+          ctx.beginPath();
+          point = { ...initial };
+          for (let i = 0; i < 140; i += 1) {
+            const screen = toCanvas(point);
+            if (i === 0) {
+              ctx.moveTo(screen.x, screen.y);
+            } else {
+              ctx.lineTo(screen.x, screen.y);
+            }
+            const slope = equationFns[currentEq](point.x, point.y);
+            point.x -= 0.08;
+            point.y -= slope * 0.08;
+            if (point.x > 5 || point.x < -5 || point.y > 5 || point.y < -5) {
+              break;
+            }
+          }
+          ctx.stroke();
+        }
+
+        function drawInitial(rect) {
+          const screen = toCanvas(initial);
+          ctx.fillStyle = "#e34c4c";
+          ctx.beginPath();
+          ctx.arc(screen.x, screen.y, 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        function draw() {
+          const rect = canvas.getBoundingClientRect();
+          ctx.clearRect(0, 0, rect.width, rect.height);
+          drawGrid(rect);
+          drawAxes(rect);
+          drawSlopeField(rect);
+          drawSolution(rect);
+          drawInitial(rect);
+          document.getElementById("icLabel").textContent =
+            `(${initial.x.toFixed(2)}, ${initial.y.toFixed(2)})`;
+        }
+
+        canvas.addEventListener("pointerdown", (event) => {
+          const rect = canvas.getBoundingClientRect();
+          const pos = {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top,
+          };
+          const screen = toCanvas(initial);
+          const dist = Math.hypot(screen.x - pos.x, screen.y - pos.y);
+          if (dist < 12) {
+            dragging = true;
+            canvas.setPointerCapture(event.pointerId);
+          }
+        });
+
+        canvas.addEventListener("pointermove", (event) => {
+          if (!dragging) return;
+          const rect = canvas.getBoundingClientRect();
+          const pos = {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top,
+          };
+          const world = toWorld(pos);
+          initial = {
+            x: Math.max(-5, Math.min(5, world.x)),
+            y: Math.max(-5, Math.min(5, world.y)),
+          };
+          draw();
+        });
+
+        canvas.addEventListener("pointerup", () => {
+          dragging = false;
+        });
+
+        document
+          .getElementById("equationSelect")
+          .addEventListener("change", (event) => {
+            currentEq = event.target.value;
+            draw();
+          });
+
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+      }
+
+      function setupReveal() {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("visible");
+              }
+            });
+          },
+          { threshold: 0.2 },
+        );
+        document
+          .querySelectorAll(".reveal")
+          .forEach((el) => observer.observe(el));
+      }
+
+      function setupProgress() {
+        const dots = document.querySelectorAll(".progress .dot");
+        const sections = [...document.querySelectorAll("section")];
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                dots.forEach((dot) => {
+                  dot.classList.toggle(
+                    "active",
+                    dot.dataset.target === entry.target.id,
+                  );
+                });
+              }
+            });
+          },
+          { threshold: 0.5 },
+        );
+        sections.forEach((section) => observer.observe(section));
+      }
+
+      const typewriterTimers = new WeakMap();
+
+      function typewriter(target, text) {
+        const existing = typewriterTimers.get(target);
+        if (existing) {
+          clearInterval(existing);
+        }
+        target.textContent = "";
+        let index = 0;
+        const interval = setInterval(() => {
+          target.textContent += text[index];
+          index += 1;
+          if (index >= text.length) {
+            clearInterval(interval);
+            typewriterTimers.delete(target);
+          }
+        }, 20);
+        typewriterTimers.set(target, interval);
+      }
+
+      function setupExercises() {
+        const cards = document.querySelectorAll(".exercise-card");
+        cards.forEach((card, cardIndex) => {
+          const hintButtons = card.querySelectorAll(".hint-btn");
+          const hintBox = card.querySelector(".hint-box");
+          const submit = card.querySelector(".submit-btn");
+          const solutionBtn = card.querySelector(".solution-btn");
+          const solution = card.querySelector(".solution");
+          hintButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const hintIndex = Number(btn.dataset.hint);
+              typewriter(hintBox, hints[cardIndex][hintIndex]);
+            });
+          });
+
+          submit.addEventListener("click", () => {
+            let correct = false;
+            card.classList.remove("shake");
+            if (cardIndex === 0) {
+              const value = card
+                .querySelector("input")
+                .value.replace(/\s+/g, "")
+                .toLowerCase();
+              const hasX = value.includes("x^3") || value.includes("x3");
+              const hasY = value.includes("y^4") || value.includes("y4");
+              const hasC = value.includes("c");
+              correct = hasX && hasY && hasC;
+            } else if (cardIndex === 1) {
+              const value = card
+                .querySelector("input")
+                .value.replace(/\s+/g, "")
+                .toLowerCase();
+              correct = value.includes("c=-2") || value.includes("c=-2.");
+            } else {
+              const value = card
+                .querySelector("input")
+                .value.replace(/\s+/g, "")
+                .toLowerCase();
+              const hasForm =
+                value.includes("t(t)=20+80e") || value.includes("t=20+80e");
+              const hasLog = value.includes("ln(7/8)");
+              correct = hasForm && hasLog;
+            }
+
+            if (correct) {
+              card.classList.add("correct");
+              solutionBtn.disabled = false;
+            } else {
+              card.classList.add("shake");
+            }
+          });
+
+          solutionBtn.addEventListener("click", () => {
+            solution.classList.toggle("visible");
+          });
+        });
+      }
+
+      function setupMatch() {
+        const dragLabels = document.querySelectorAll(".drag-label");
+        const zones = document.querySelectorAll(".drop-zone");
+        dragLabels.forEach((label) => {
+          label.addEventListener("dragstart", (event) => {
+            event.dataTransfer.setData("text/plain", label.dataset.eq);
+          });
+        });
+        zones.forEach((zone) => {
+          zone.addEventListener("dragover", (event) => event.preventDefault());
+          zone.addEventListener("drop", (event) => {
+            event.preventDefault();
+            const eq = event.dataTransfer.getData("text/plain");
+            zone.textContent = `Dropped: ${eq}`;
+            zone.dataset.eq = eq;
+          });
+        });
+
+        document.getElementById("matchSubmit").addEventListener("click", () => {
+          const feedback = document.getElementById("matchFeedback");
+          const zoneA = document.querySelector('.drop-zone[data-slot="A"]');
+          const zoneB = document.querySelector('.drop-zone[data-slot="B"]');
+          if (!zoneA.dataset.eq || !zoneB.dataset.eq) {
+            feedback.textContent = "Place both equations before submitting.";
+            return;
+          }
+          const correct =
+            zoneA.dataset.eq === "x_plus_y" && zoneB.dataset.eq === "sinx";
+          feedback.textContent = correct
+            ? "Great match!"
+            : "Not quite. Re-check the slope patterns.";
+        });
+      }
+
+      function drawMatchCanvas(canvasId, equationKey) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        const scale = window.devicePixelRatio || 1;
+        canvas.width = rect.width * scale;
+        canvas.height = rect.height * scale;
+        ctx.setTransform(scale, 0, 0, scale, 0, 0);
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        ctx.strokeStyle = "rgba(62, 168, 160, 0.45)";
+        ctx.lineWidth = 1.2;
+        const step = rect.width / 8;
+        for (let x = step; x < rect.width; x += step) {
+          for (let y = step; y < rect.height; y += step) {
+            const worldX = (x / rect.width) * 10 - 5;
+            const worldY = 3 - (y / rect.height) * 6;
+            const slope = equationFns[equationKey](worldX, worldY);
+            const angle = Math.atan(slope);
+            const len = 6;
+            ctx.beginPath();
+            ctx.moveTo(x - len * Math.cos(angle), y - len * Math.sin(angle));
+            ctx.lineTo(x + len * Math.cos(angle), y + len * Math.sin(angle));
+            ctx.stroke();
+          }
+        }
+      }
+
+      function setupConfidenceSlider() {
+        const slider = document.getElementById("confidence");
+        const label = document.getElementById("confidenceLabel");
+        const phrases = {
+          1: "I am lost",
+          2: "I need more practice",
+          3: "I am getting there",
+          4: "I feel confident",
+          5: "I have got this",
+        };
+        slider.addEventListener("input", () => {
+          label.textContent = phrases[slider.value];
+        });
+      }
+
+      function handleFlipCards() {
+        document.querySelectorAll(".flip-card").forEach((card) => {
+          card.addEventListener("click", () =>
+            card.classList.toggle("flipped"),
+          );
+        });
+      }
+
+      function animateSlopeCanvas() {
+        const canvas = document.getElementById("slopeCanvas");
+        canvas.style.opacity = "0";
+        canvas.style.transition = "opacity 1.2s ease";
+        requestAnimationFrame(() => {
+          canvas.style.opacity = "1";
+        });
+      }
+
+      function initMath() {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "\\(", right: "\\)", display: false },
+          ],
+        });
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        setupHeroCanvas();
+        setupSlopeField();
+        setupReveal();
+        setupProgress();
+        setupExercises();
+        setupMatch();
+        setupConfidenceSlider();
+        handleFlipCards();
+        animateSlopeCanvas();
+        drawMatchCanvas("matchCanvasA", "x_plus_y");
+        drawMatchCanvas("matchCanvasB", "sinx");
+        initMath();
+      });
+    </script>
+  </body>
+</html>
