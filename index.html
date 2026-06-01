@@ -348,6 +348,7 @@
         border-top: 1px dashed var(--line);
         padding-top: 10px;
         display: none;
+        overflow-x: auto;
       }
 
       .solution.visible {
@@ -358,6 +359,22 @@
         opacity: 0;
         transform: translateX(-20px);
         animation: slide-in 0.6s ease forwards;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding: 6px 0;
+      }
+
+      .solution-math {
+        width: 100%;
+        min-width: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+
+      .solution-math .katex {
+        font-size: clamp(0.95rem, 1.6vw, 1.15rem);
       }
 
       @keyframes slide-in {
@@ -367,10 +384,15 @@
         }
       }
 
-      .solution-line span {
+      .solution-note {
         color: var(--muted);
         font-size: 0.9rem;
-        margin-left: 6px;
+        white-space: normal;
+      }
+
+      .solution-line .katex-display {
+        margin: 0;
+        text-align: left;
       }
 
       .match-grid {
@@ -600,20 +622,32 @@
                 <button class="solution-btn" disabled>Show Solution</button>
                 <div class="solution">
                   <div class="solution-line" style="animation-delay: 0.1s">
-                    \(x^2 + 4 = y^3\frac{dy}{dx}\)
-                    <span>(rearrange terms)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="x^2 + 4 = y^3\frac{dy}{dx}"
+                    ></div>
+                    <div class="solution-note">(rearrange terms)</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 0.3s">
-                    \((x^2+4)\,dx = y^3\,dy\)
-                    <span>(separate variables)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="(x^2+4)\,dx = y^3\,dy"
+                    ></div>
+                    <div class="solution-note">(separate variables)</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 0.5s">
-                    \(\frac{1}{3}x^3 + 4x = \frac{1}{4}y^4 + C\)
-                    <span>(integrate both sides)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="\frac{1}{3}x^3 + 4x = \frac{1}{4}y^4 + C"
+                    ></div>
+                    <div class="solution-note">(integrate both sides)</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 0.7s">
-                    \(4x^3 + 48x - 3y^4 = C\)
-                    <span>(combine constants)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="4x^3 + 48x - 3y^4 = C"
+                    ></div>
+                    <div class="solution-note">(combine constants)</div>
                   </div>
                 </div>
                 <p class="muted" style="font-size: 0.85rem">
@@ -637,24 +671,38 @@
                 <button class="solution-btn" disabled>Show Solution</button>
                 <div class="solution">
                   <div class="solution-line" style="animation-delay: 0.1s">
-                    \(\frac{y^2(5x^2+1)}{x^2(y^5+4)}\)
-                    <span>(factor numerator and denominator)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="\frac{y^2(5x^2+1)}{x^2(y^5+4)}"
+                    ></div>
+                    <div class="solution-note">
+                      (factor numerator and denominator)
+                    </div>
                   </div>
                   <div class="solution-line" style="animation-delay: 0.3s">
-                    \(\frac{y^5+4}{y^2} dy = \frac{5x^2+1}{x^2} dx\)
-                    <span>(separate variables)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="\frac{y^5+4}{y^2} dy = \frac{5x^2+1}{x^2} dx"
+                    ></div>
+                    <div class="solution-note">(separate variables)</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 0.5s">
-                    \(\int (y^3 + 4y^{-2})\,dy = \int (5 + x^{-2})\,dx\)
-                    <span>(rewrite with powers)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="\int (y^3 + 4y^{-2})\,dy = \int (5 + x^{-2})\,dx"
+                    ></div>
+                    <div class="solution-note">(rewrite with powers)</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 0.7s">
-                    \(\frac{1}{4}y^4 - \frac{4}{y} = 5x - \frac{1}{x} + C\)
-                    <span>(integrate)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="\frac{1}{4}y^4 - \frac{4}{y} = 5x - \frac{1}{x} + C"
+                    ></div>
+                    <div class="solution-note">(integrate)</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 0.9s">
-                    \(C = -2\)
-                    <span>(apply \(y(1)=2\))</span>
+                    <div class="solution-math" data-latex="C = -2"></div>
+                    <div class="solution-note">(apply \(y(1)=2\))</div>
                   </div>
                 </div>
                 <p class="muted" style="font-size: 0.85rem">
@@ -679,32 +727,50 @@
                 <button class="solution-btn" disabled>Show Solution</button>
                 <div class="solution">
                   <div class="solution-line" style="animation-delay: 0.1s">
-                    \(\frac{dT}{dt} = k(T-20)\)
-                    <span>(Newton's Law of Cooling)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="\frac{dT}{dt} = k(T-20)"
+                    ></div>
+                    <div class="solution-note">(Newton's Law of Cooling)</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 0.3s">
-                    \(\frac{dT}{T-20} = k\,dt\)
-                    <span>(separate variables)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="\frac{dT}{T-20} = k\,dt"
+                    ></div>
+                    <div class="solution-note">(separate variables)</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 0.5s">
-                    \(\ln|T-20| = kt + C\)
-                    <span>(integrate)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="\ln|T-20| = kt + C"
+                    ></div>
+                    <div class="solution-note">(integrate)</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 0.7s">
-                    \(T = 20 + Ae^{kt}\)
-                    <span>(exponentiate)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="T = 20 + Ae^{kt}"
+                    ></div>
+                    <div class="solution-note">(exponentiate)</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 0.9s">
-                    \(A = 80\)
-                    <span>(apply \(T(0)=100\))</span>
+                    <div class="solution-math" data-latex="A = 80"></div>
+                    <div class="solution-note">(apply \(T(0)=100\))</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 1.1s">
-                    \(k = \frac{1}{4}\ln\left(\frac{7}{8}\right)\)
-                    <span>(apply \(T(4)=90\))</span>
+                    <div
+                      class="solution-math"
+                      data-latex="k = \frac{1}{4}\ln\left(\frac{7}{8}\right)"
+                    ></div>
+                    <div class="solution-note">(apply \(T(4)=90\))</div>
                   </div>
                   <div class="solution-line" style="animation-delay: 1.3s">
-                    \(T(t)=20+80e^{\frac{t}{4}\ln(7/8)}\)
-                    <span>(final model)</span>
+                    <div
+                      class="solution-math"
+                      data-latex="T(t)=20+80e^{\frac{t}{4}\ln(7/8)}"
+                    ></div>
+                    <div class="solution-note">(final model)</div>
                   </div>
                 </div>
                 <p class="muted" style="font-size: 0.85rem">
@@ -1084,6 +1150,7 @@
       function setupExercises() {
         const cards = document.querySelectorAll(".exercise-card");
         cards.forEach((card, cardIndex) => {
+          let wrongAttempts = 0;
           const hintButtons = card.querySelectorAll(".hint-btn");
           const hintBox = card.querySelector(".hint-box");
           const submit = card.querySelector(".submit-btn");
@@ -1130,11 +1197,30 @@
               solutionBtn.disabled = false;
             } else {
               card.classList.add("shake");
+              wrongAttempts += 1;
+              if (wrongAttempts >= 1) {
+                solutionBtn.disabled = false;
+              }
             }
           });
 
           solutionBtn.addEventListener("click", () => {
             solution.classList.toggle("visible");
+            if (
+              solution.classList.contains("visible") &&
+              !solution.dataset.mathRendered
+            ) {
+              solution.querySelectorAll(".solution-math").forEach((el) => {
+                const latex = el.dataset.latex || "";
+                if (typeof katex !== "undefined" && latex) {
+                  katex.render(latex, el, {
+                    displayMode: true,
+                    throwOnError: false,
+                  });
+                }
+              });
+              solution.dataset.mathRendered = "true";
+            }
           });
         });
       }
